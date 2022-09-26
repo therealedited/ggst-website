@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -40,7 +41,7 @@ func init() {
 func UpdateDatabase(gameID internal.Game) {
 	if gameID == internal.Strive {
 		var striveMoves []StriveMove
-		dustloopData := readLocalJsonData("database/json/strive.json", movelistStrive)
+		dustloopData := readLocalJsonData("database/json/strive.json")
 		jsonMarshalling(&dustloopData, &striveMoves)
 		fmt.Printf("%v", striveMoves[2].Input)
 	}
@@ -55,10 +56,13 @@ func initHTTPClient() http.Client {
 	return *client
 }
 
-func readLocalJsonData(path string, url string) []byte {
+func readLocalJsonData(path string) []byte {
+
 	if !internal.IsFileExists(path) {
-		err := os.WriteFile(path, fetchData(url), 0666)
-		internal.CheckForError(err)
+		if strings.Contains(path, "strive") {
+			err := os.WriteFile(path, fetchData(movelistStrive), 0666)
+			internal.CheckForError(err)
+		}
 	}
 	dustloopData, err := os.ReadFile(path)
 	internal.CheckForError(err)
