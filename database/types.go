@@ -1,10 +1,5 @@
 package database
 
-//Thank you MediaWiki.
-type Wikitext interface {
-	int | string
-}
-
 type StriveMove struct {
 	Chara    string      `json:"chara"`
 	Input    interface{} `json:"input,omitempty"`

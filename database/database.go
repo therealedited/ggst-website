@@ -39,13 +39,12 @@ func init() {
 
 func UpdateDatabase(gameID internal.Game) {
 	if gameID == internal.Strive {
-		dustloopData := fetchData(movelistStrive)
 		var striveMoves []StriveMove
-		jsonMarshalling(dustloopData, &striveMoves)
-		fmt.Printf(striveMoves[0].Name)
+		dustloopData := readLocalJsonData("database/json/strive.json", movelistStrive)
+		jsonMarshalling(&dustloopData, &striveMoves)
+		fmt.Printf("%v", striveMoves[2].Input)
 	}
 }
-
 func initHTTPClient() http.Client {
 	tr := &http.Transport{
 		MaxIdleConns:       10,
@@ -54,6 +53,16 @@ func initHTTPClient() http.Client {
 	}
 	client := &http.Client{Transport: tr}
 	return *client
+}
+
+func readLocalJsonData(path string, url string) []byte {
+	if !internal.IsFileExists(path) {
+		err := os.WriteFile(path, fetchData(url), 0666)
+		internal.CheckForError(err)
+	}
+	dustloopData, err := os.ReadFile(path)
+	internal.CheckForError(err)
+	return dustloopData
 }
 
 func fetchData(url string) []byte {
@@ -66,7 +75,7 @@ func fetchData(url string) []byte {
 	return body
 }
 
-func jsonMarshalling[K GameMove](data []byte, moveData *[]K) {
-	err := json.Unmarshal(data, &moveData)
+func jsonMarshalling[K GameMove](data *[]byte, moveData *[]K) {
+	err := json.Unmarshal(*data, &moveData)
 	internal.CheckForError(err)
 }
