@@ -2,10 +2,15 @@ package database
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/therealedited/ggst-website/internal"
 	"gopkg.in/ini.v1"
 )
 
@@ -32,10 +37,36 @@ func init() {
 	Inst = db
 }
 
-func populateDb() {
-
+func UpdateDatabase(gameID internal.Game) {
+	if gameID == internal.Strive {
+		dustloopData := fetchData(movelistStrive)
+		var striveMoves []StriveMove
+		jsonMarshalling(dustloopData, &striveMoves)
+		fmt.Printf(striveMoves[0].Name)
+	}
 }
 
-func readJson(characters []StriveCharacter) {
+func initHTTPClient() http.Client {
+	tr := &http.Transport{
+		MaxIdleConns:       10,
+		IdleConnTimeout:    30 * time.Second,
+		DisableCompression: true,
+	}
+	client := &http.Client{Transport: tr}
+	return *client
+}
 
+func fetchData(url string) []byte {
+	client := initHTTPClient()
+	resp, err := client.Get(url)
+	internal.CheckForError(err)
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	internal.CheckForError(err)
+	return body
+}
+
+func jsonMarshalling[K GameMove](data []byte, moveData *[]K) {
+	err := json.Unmarshal(data, &moveData)
+	internal.CheckForError(err)
 }
