@@ -41,7 +41,7 @@ func init() {
 func UpdateDatabase(gameID internal.Game) {
 	if gameID == internal.Strive {
 		var striveMoves []StriveMove
-		dustloopData := readLocalJsonData("database/json/strive.json")
+		dustloopData := readLocalJsonData("database/json/strive.json") //Maybe add that to config.ini?
 		jsonMarshalling(&dustloopData, &striveMoves)
 		fmt.Printf("%v", striveMoves[2].Input)
 	}

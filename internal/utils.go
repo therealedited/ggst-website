@@ -16,3 +16,15 @@ func IsFileExists(path string) bool {
 	}
 	return true
 }
+
+func GGShortStringToInt(str string) int {
+	switch str {
+	case "SO":
+		return 0
+	case "KY":
+		return 1
+	//TODO: Add more characters.
+	default:
+		return -1
+	}
+}
