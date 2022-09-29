@@ -33,7 +33,7 @@ func (g Game) String() string {
 type GGCharacter int
 
 const (
-	SO GGCharacter = iota
+	SO GGCharacter = iota + 1
 	KY
 	MA
 	AX
@@ -58,45 +58,47 @@ const (
 
 func (gg GGCharacter) String() string {
 	switch gg {
-	case 0:
-		return "SO"
 	case 1:
-		return "KY"
+		return "SO"
 	case 2:
-		return "MA"
+		return "KY"
 	case 3:
-		return "AX"
+		return "MA"
 	case 4:
-		return "CH"
+		return "AX"
 	case 5:
-		return "PO"
+		return "CH"
 	case 6:
-		return "FA"
+		return "PO"
 	case 7:
-		return "MI"
+		return "FA"
 	case 8:
-		return "ZA"
+		return "MI"
 	case 9:
-		return "RA"
+		return "ZA"
 	case 10:
-		return "LE"
+		return "RA"
 	case 11:
-		return "NA"
+		return "LE"
 	case 12:
-		return "GI"
+		return "NA"
 	case 13:
-		return "AN"
+		return "GI"
 	case 14:
-		return "GO"
+		return "AN"
 	case 15:
-		return "JC"
+		return "IN"
 	case 16:
-		return "HA"
+		return "GO"
 	case 17:
-		return "BA"
+		return "JC"
 	case 18:
-		return "TE"
+		return "HC"
 	case 19:
+		return "BA"
+	case 20:
+		return "TE"
+	case 21:
 		return "BR"
 	default:
 		return "<nil>"

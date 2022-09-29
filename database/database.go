@@ -43,8 +43,35 @@ func UpdateDatabase(gameID internal.Game) {
 		var striveMoves []StriveMove
 		dustloopData := readLocalJsonData("database/json/strive.json") //Maybe add that to config.ini?
 		jsonMarshalling(&dustloopData, &striveMoves)
-		fmt.Printf("%v", striveMoves[2].Input)
+		updateStriveDatabase(&striveMoves)
 	}
+}
+
+func updateStriveDatabase(s *[]StriveMove) {
+	fmt.Print("Updating Strive.")
+	var moveName string
+	for _, v := range *s {
+		if v.Name == "" {
+			moveName = "Normal"
+		} else {
+			moveName = v.Name
+		}
+		_, err := Inst.Exec("INSERT INTO ggst.move (idChar_FK ,name, input, damage, guard, startup, active, recovery, onBlock, onHit, invuln, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+			internal.GGLongStringToInt(v.Chara),
+			moveName,
+			v.Input,
+			v.Damage,
+			v.Guard,
+			v.Startup,
+			v.Active,
+			v.Recovery,
+			v.OnBlock,
+			v.OnHit,
+			v.Invuln,
+			v.Type)
+		internal.CheckForError(err)
+	}
+
 }
 func initHTTPClient() http.Client {
 	tr := &http.Transport{
