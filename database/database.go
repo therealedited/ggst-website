@@ -1,25 +1,20 @@
+// This package provides functions to perform multiple operation on a database such as updating it with from a json that was fetched from dustloop.
 package database
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
-	"strings"
-	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/therealedited/ggst-website/internal"
 	"gopkg.in/ini.v1"
 )
 
-var movelistStrive string = "https://www.dustloop.com/wiki/index.php?title=Special:CargoExport&tables=MoveData_GGST&&fields=chara%2C+input%2C+name%2C+damage%2C+guard%2C+startup%2C+active%2C+recovery%2C+onBlock%2C+onHit%2C+invuln%2C+type&&order+by=%60chara%60%2C%60input%60%2C%60name%60%2C%60cargo__MoveData_GGST%60.%60images__full%60%2C%60damage%60&limit=1000&format=json"
-
 // Thanks https://github.com/movildima/GGStriveUtilsBot/blob/master/GGStriveUtilsBot/Utils/DustloopDataFetcher.cs#L17
 var Inst *sql.DB
 
+// Initializes the database singleton with different values coming from the global.ini file. As of now, it only works with MySQL.
 func init() {
 	dbCfg, err := ini.Load("./configs/global.ini")
 	if err != nil {
@@ -38,16 +33,24 @@ func init() {
 	Inst = db
 }
 
+func PingDatabase() bool {
+	err := Inst.Ping()
+	return err != nil
+}
+
+// Updates the database from a json.
 func UpdateDatabase(gameID internal.Game) {
 	if gameID == internal.Strive {
-		var striveMoves []StriveMove
-		dustloopData := readLocalJsonData("database/json/strive.json") //Maybe add that to config.ini?
-		jsonMarshalling(&dustloopData, &striveMoves)
-		updateStriveDatabase(&striveMoves)
+		var striveMoves []internal.StriveMove
+		dustloopData := internal.ReadLocalJsonData("database/json/strive.json") //Maybe add that to config.ini?
+		internal.JsonMarshalling(&dustloopData, &striveMoves)
+		//updateStriveDatabase(&striveMoves)
+		fmt.Printf("%s", striveMoves[0].Name)
 	}
 }
 
-func updateStriveDatabase(s *[]StriveMove) {
+// Specific function to update the Guilty Gear: Strive database.
+func UpdateStriveDatabase(s *[]internal.StriveMove) {
 	fmt.Print("Updating Strive.")
 	var moveName string
 	for _, v := range *s {
@@ -72,41 +75,4 @@ func updateStriveDatabase(s *[]StriveMove) {
 		internal.CheckForError(err)
 	}
 
-}
-func initHTTPClient() http.Client {
-	tr := &http.Transport{
-		MaxIdleConns:       10,
-		IdleConnTimeout:    30 * time.Second,
-		DisableCompression: true,
-	}
-	client := &http.Client{Transport: tr}
-	return *client
-}
-
-func readLocalJsonData(path string) []byte {
-
-	if !internal.IsFileExists(path) {
-		if strings.Contains(path, "strive") {
-			err := os.WriteFile(path, fetchData(movelistStrive), 0666)
-			internal.CheckForError(err)
-		}
-	}
-	dustloopData, err := os.ReadFile(path)
-	internal.CheckForError(err)
-	return dustloopData
-}
-
-func fetchData(url string) []byte {
-	client := initHTTPClient()
-	resp, err := client.Get(url)
-	internal.CheckForError(err)
-	defer resp.Body.Close()
-	body, err := io.ReadAll(resp.Body)
-	internal.CheckForError(err)
-	return body
-}
-
-func jsonMarshalling[K GameMove](data *[]byte, moveData *[]K) {
-	err := json.Unmarshal(*data, &moveData)
-	internal.CheckForError(err)
 }

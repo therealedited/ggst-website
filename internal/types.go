@@ -1,5 +1,7 @@
-package database
+// This package holds all the different structures used within the codebase.
+package internal
 
+//Type for a move from Guilty Gear: Strive
 type StriveMove struct {
 	Chara    string      `json:"chara"`
 	Input    interface{} `json:"input,omitempty"`
@@ -15,6 +17,7 @@ type StriveMove struct {
 	Type     string      `json:"type,omitempty"`
 }
 
+//Type for a move from Guilty Gear: Xrd. Placeholder for now.
 type XrdMove struct {
 	CharacterName string
 	Input         string
@@ -30,6 +33,7 @@ type XrdMove struct {
 	Invuln        string
 }
 
+//Type abstraction for a fighting game move.
 type GameMove interface {
 	StriveMove | XrdMove
 }

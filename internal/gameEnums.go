@@ -1,5 +1,7 @@
+// This files hold all the different enums used to work with the database and some functions associated to it such as Stringers.
 package internal
 
+//Type for game ids.
 type Game int
 
 const (
@@ -11,6 +13,7 @@ const (
 	BlazblueCentralFiction
 )
 
+// Stringer for game constants. Transforms an interger into its string value. As an example, Strive.String() returns 0.
 func (g Game) String() string {
 	switch g {
 	case 0:
@@ -30,6 +33,7 @@ func (g Game) String() string {
 	}
 }
 
+//Type for guilty gear characters ids.
 type GGCharacter int
 
 const (
@@ -56,6 +60,7 @@ const (
 	BR
 )
 
+//Stringer for game characters. Transforms an interger into its string value. As an example, SO.String() returns 1.
 func (gg GGCharacter) String() string {
 	switch gg {
 	case 1:

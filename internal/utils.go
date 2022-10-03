@@ -1,13 +1,24 @@
 package internal
 
-import "os"
+import (
+	"encoding/json"
+	"io"
+	"net/http"
+	"os"
+	"strings"
+	"time"
+)
 
+var movelistStrive string = "https://www.dustloop.com/wiki/index.php?title=Special:CargoExport&tables=MoveData_GGST&&fields=chara%2C+input%2C+name%2C+damage%2C+guard%2C+startup%2C+active%2C+recovery%2C+onBlock%2C+onHit%2C+invuln%2C+type&&order+by=%60chara%60%2C%60input%60%2C%60name%60%2C%60cargo__MoveData_GGST%60.%60images__full%60%2C%60damage%60&limit=1000&format=json"
+
+// Checks for errors. Terminates the program if there is one.
 func CheckForError(err error) {
 	if err != nil {
 		panic(err)
 	}
 }
 
+// Checks if a file exists at the given path.
 func IsFileExists(path string) bool {
 	if _, err := os.Stat(path); err != nil {
 		if os.IsNotExist(err) {
@@ -17,6 +28,7 @@ func IsFileExists(path string) bool {
 	return true
 }
 
+// Function to transform a "ShortString" to its GGCharacter id. See gameEnums.go
 func GGShortStringToInt(str string) int {
 	switch str {
 	case "SO":
@@ -66,6 +78,7 @@ func GGShortStringToInt(str string) int {
 	}
 }
 
+// Function to transform a "LongString" to its GGCharacter id. See gameEnums.go
 func GGLongStringToInt(str string) int {
 	switch str {
 	case "Sol Badguy":
@@ -113,4 +126,51 @@ func GGLongStringToInt(str string) int {
 	default:
 		return -1
 	}
+}
+
+// Initializes a http client to communicate over the internet.
+func InitHTTPClient() http.Client {
+	tr := &http.Transport{
+		MaxIdleConns:       10,
+		IdleConnTimeout:    30 * time.Second,
+		DisableCompression: true,
+	}
+	client := &http.Client{Transport: tr}
+	return *client
+}
+
+// Fetches data by performing a GET request on an URL.
+func FetchData(url string) []byte {
+	client := InitHTTPClient()
+	resp, err := client.Get(url)
+	CheckForError(err)
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	CheckForError(err)
+	return body
+}
+
+// Transforms a byte array into a moveData struct array, an abstract type that should hold move data from a fighting game.
+func JsonMarshalling[K GameMove](data *[]byte, moveData *[]K) {
+	err := json.Unmarshal(*data, &moveData)
+	CheckForError(err)
+}
+
+// Reads a json from disk and returns its content as a byte array.
+func ReadLocalJsonData(path string) []byte {
+
+	if !IsFileExists(path) {
+		if strings.Contains(path, "strive") {
+			FetchAndCreateFile(path, movelistStrive)
+		}
+	}
+	dustloopData, err := os.ReadFile(path)
+	CheckForError(err)
+	return dustloopData
+}
+
+// Used when a file doesn't exist and needs to be fetched from a remote location. It is then written on the disk as to not make too much requests on an api.
+func FetchAndCreateFile(url string, path string) {
+	err := os.WriteFile(path, FetchData(url), 0666)
+	CheckForError(err)
 }
