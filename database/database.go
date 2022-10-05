@@ -11,7 +11,6 @@ import (
 	"gopkg.in/ini.v1"
 )
 
-// Thanks https://github.com/movildima/GGStriveUtilsBot/blob/master/GGStriveUtilsBot/Utils/DustloopDataFetcher.cs#L17
 var Inst *sql.DB
 
 // Initializes the database singleton with different values coming from the global.ini file. As of now, it only works with MySQL.

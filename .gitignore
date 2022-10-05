@@ -14,3 +14,4 @@
 # Dependency directories (remove the comment below to include it)
 configs/global.ini
 database/json
+website/images
